@@ -1,0 +1,6 @@
+Method,MSE,WCIC
+2to10_MagmaClust_5clusters,4.1093 (12.7753),0.9521 (0.2136)
+3to10_MagmaClust_5clusters,3.9364 (12.6482),0.9455 (0.2271)
+4to10_MagmaClust_5clusters,3.106 (8.834),0.9511 (0.2158)
+5to10_MagmaClust_5clusters,2.8083 (8.6009),0.9447 (0.2285)
+6to10_MagmaClust_5clusters,2.5492 (7.9601),0.9446 (0.2288)
