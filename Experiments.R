@@ -184,16 +184,16 @@ loop_pred = function(db, mod, hyperpost = NULL, remove_random = F,
     return()
 }
 
-summarise_res = function(res, group_by = 'Method', round = 4){
+summarise_res = function(res, by = Method, digits = 4){
   res %>% 
     dplyr::select(- ID) %>%
-    group_by(across(group_by)) %>% 
-    summarise(across(all_of(c('MSE', 'WCIC')),
+    group_by({{ by }}) %>% 
+    reframe(across(all_of(c('MSE', 'WCIC')),
                      list('Mean' = mean, 'SD' = sd), na.rm = TRUE)) %>% 
-    mutate(across(MSE_Mean:WCIC_SD, ~ round(.x, round))) %>% 
+    mutate(across(MSE_Mean:WCIC_SD, \(x) round(x, digits))) %>% 
     mutate('MSE' = paste0(MSE_Mean, ' (', MSE_SD, ')'),
            'WCIC' =  paste0(WCIC_Mean, ' (', WCIC_SD, ')')) %>%
-    dplyr::select(c(group_by, MSE, WCIC)) %>% 
+    dplyr::select(c({{ by }}, MSE, WCIC)) %>% 
     return()
 }
 
@@ -317,7 +317,7 @@ db_test = db %>%
 mod = read_rds('Training/trained_model.rds')
 
 ## Pre-compute all mean processes on a fine grid to speed up all experiments
-grid_inputs = seq(0, 10.8, 0.1)
+grid_inputs = seq(0, 10.3, 0.1)
 all_inputs = unique(db$Input) %>% union(grid_inputs) %>% sort()
 h_post = hyperposterior_clust(trained_model = mod, grid_inputs = all_inputs)
 
@@ -447,7 +447,7 @@ ID_ow = samples %>%
 ## Retrieve the full trajectories of those crossing the threshold
 samples_ow = samples %>% filter(Sample %in% ID_ow)
 
-plot_samples(pred = pred, samples = samples) +
+plot_magmaclust(pred = pred, samples = T) +
   geom_line(data = samples_ow,
             aes(x = Input, y = Output, group = Sample),
             colour = "black", alpha = 1) +
@@ -478,7 +478,7 @@ res = eval(db = test_db, mod = mod, hyperpost = h_post, remove_random = F,
            start_input_test = 2, name = 'MagmaClust_5clusters_2to10')
 
 ## Averaged summary
-summary_res = summarise_res(res, group_by = 'Method')
+summary_res = summarise_res(res, by = Method)
 
 ##### Missing data reconstruction #####
 
@@ -495,7 +495,7 @@ res_missing_ratios = c(0.1, 0.25, 0.5, 0.75, 0.9) %>%
   bind_rows()
 
 ## Averaged summary
-summary_res_missing_ratios = summarise_res(res_missing_ratios, group_by = 'Ratio_missing')
+summary_res_missing_ratios = summarise_res(res_missing_ratios, by = Ratio_missing)
 
 ##### Prediction and plot of errors sorted by increasing uncertainty #####
 
